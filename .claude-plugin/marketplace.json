@@ -1,0 +1,15 @@
+{
+  "name": "trendjack",
+  "description": "The TrendJack plugin for Claude: your TrendJack connection plus skills for briefings, triage, content plans and drafts.",
+  "owner": {
+    "name": "trendJack LTD",
+    "url": "https://app.trendjack.io"
+  },
+  "plugins": [
+    {
+      "name": "trendjack",
+      "source": "./",
+      "description": "Build your brand profile, brief you on new signals, triage them, plan a week of content and draft posts in your brand voice, all from TrendJack data."
+    }
+  ]
+}

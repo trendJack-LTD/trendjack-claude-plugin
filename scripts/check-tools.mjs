@@ -1,0 +1,101 @@
+#!/usr/bin/env node
+// Fails when a skill names a tool that tools.json does not list.
+// A snake_case word in a skill must be a tool or an enum value from tools.json.
+// The bare tool names search and fetch are plain English words, so this script cannot police them.
+
+import { readFileSync, readdirSync, statSync } from "node:fs";
+import { join, relative } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const root = fileURLToPath(new URL("..", import.meta.url));
+const contract = JSON.parse(readFileSync(join(root, "tools.json"), "utf8"));
+const tools = new Set(contract.tools.map((tool) => tool.name));
+const enumValues = new Set(contract.enumValues ?? []);
+
+const MAX_DESCRIPTION = 1024;
+const MAX_SKILL_LINES = 500;
+const SNAKE_CASE = /\b[a-z][a-z0-9]*(?:_[a-z0-9]+)+\b/g;
+const PREFIXED_TOOL = /\bmcp__[A-Za-z0-9_-]+/g;
+
+const problems = [];
+
+function markdownFiles(dir) {
+  return readdirSync(dir).flatMap((entry) => {
+    const path = join(dir, entry);
+    if (statSync(path).isDirectory()) return markdownFiles(path);
+    return entry.endsWith(".md") ? [path] : [];
+  });
+}
+
+function frontmatter(text) {
+  const match = text.match(/^---\n([\s\S]*?)\n---\n/);
+  if (!match) return null;
+  const fields = {};
+  for (const line of match[1].split("\n")) {
+    const pair = line.match(/^([a-z-]+):\s*(.*)$/);
+    if (pair) fields[pair[1]] = pair[2].replace(/^["']|["']$/g, "");
+  }
+  return fields;
+}
+
+const skillsDir = join(root, "skills");
+const skillFolders = readdirSync(skillsDir).filter((entry) =>
+  statSync(join(skillsDir, entry)).isDirectory(),
+);
+
+for (const folder of skillFolders) {
+  const skillPath = join(skillsDir, folder, "SKILL.md");
+  let text;
+  try {
+    text = readFileSync(skillPath, "utf8");
+  } catch {
+    problems.push(`skills/${folder}: SKILL.md is missing`);
+    continue;
+  }
+
+  const fields = frontmatter(text);
+  if (!fields) {
+    problems.push(`skills/${folder}/SKILL.md: frontmatter is missing`);
+  } else {
+    if (fields.name !== folder) {
+      problems.push(`skills/${folder}/SKILL.md: name "${fields.name}" does not match the folder`);
+    }
+    if (!fields.description) {
+      problems.push(`skills/${folder}/SKILL.md: description is missing`);
+    } else if (fields.description.length > MAX_DESCRIPTION) {
+      problems.push(
+        `skills/${folder}/SKILL.md: description has ${fields.description.length} characters, over ${MAX_DESCRIPTION}`,
+      );
+    }
+  }
+
+  const lines = text.split("\n").length;
+  if (lines >= MAX_SKILL_LINES) {
+    problems.push(`skills/${folder}/SKILL.md: ${lines} lines, the limit is under ${MAX_SKILL_LINES}`);
+  }
+}
+
+for (const file of markdownFiles(skillsDir)) {
+  const name = relative(root, file);
+  const text = readFileSync(file, "utf8");
+
+  for (const match of text.matchAll(PREFIXED_TOOL)) {
+    problems.push(`${name}: "${match[0]}" is a client-prefixed name; use the bare tool name`);
+  }
+
+  for (const match of text.matchAll(SNAKE_CASE)) {
+    const word = match[0];
+    if (tools.has(word) || enumValues.has(word)) continue;
+    problems.push(`${name}: "${word}" is not a tool or enum value in tools.json`);
+  }
+}
+
+if (problems.length > 0) {
+  console.error(`check-tools: ${problems.length} problem(s)`);
+  for (const problem of problems) console.error(`  - ${problem}`);
+  process.exit(1);
+}
+
+console.log(
+  `check-tools: ${skillFolders.length} skills name only the ${tools.size} tools in tools.json`,
+);

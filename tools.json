@@ -1,0 +1,31 @@
+{
+  "server": "trendjack",
+  "url": "https://app.trendjack.io/api/mcp",
+  "tools": [
+    { "name": "get_connection", "title": "Get connection", "access": "read" },
+    { "name": "list_signals", "title": "List signals", "access": "read" },
+    { "name": "get_signal", "title": "Get signal", "access": "read" },
+    { "name": "search", "title": "Search signals", "access": "read" },
+    { "name": "fetch", "title": "Fetch signal", "access": "read" },
+    { "name": "get_company_profile", "title": "Get company profile", "access": "read" },
+    { "name": "list_drafts", "title": "List drafts", "access": "read" },
+    { "name": "populate_company_profile", "title": "Save company profile", "access": "write" },
+    { "name": "set_signal_status", "title": "Set signal status", "access": "write" },
+    { "name": "create_draft", "title": "Create draft", "access": "write" },
+    { "name": "update_draft_text", "title": "Update draft text", "access": "write" }
+  ],
+  "enumValues": [
+    "not_relevant",
+    "not_our_angle",
+    "already_covered",
+    "no_time",
+    "long_form",
+    "email_prospect",
+    "email_journalist",
+    "media_comment",
+    "in_review",
+    "changes_requested",
+    "with_the_team",
+    "signed_off"
+  ]
+}

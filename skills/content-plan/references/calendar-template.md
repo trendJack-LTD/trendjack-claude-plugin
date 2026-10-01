@@ -19,7 +19,7 @@ List each active pillar with its number of slots, for example:
 
 ## Not used
 
-List up to five strong signals that the plan left out, each with one line on why. For example: "Covers the same event as Monday's slot" or "Older than a week".
+List up to five strong signals that the plan left out, each with one line on why. For example: "Covers the same event as Monday's slot" or "Fits no active pillar".
 
 ## Column rules
 

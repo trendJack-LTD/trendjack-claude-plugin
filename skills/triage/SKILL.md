@@ -11,13 +11,15 @@ A signal is one news item that TrendJack judged relevant to a workspace. Each si
 - **kept**: someone has taken it on
 - **cleared**: dismissed, with an optional reason
 
-TrendJack uses kept and cleared signals as examples for the next daily scan. It scores a story like the kept ones higher and a story like the cleared ones lower. A clear with reason `no_time` is the exception: it teaches the scan nothing. So each decision changes what the user sees tomorrow, and the reason matters.
+TrendJack uses kept and cleared signals as examples for its next scan. It scores a story like the kept ones higher and a story like the cleared ones lower. A clear with reason `no_time` is the exception: it teaches the scan nothing. So each decision changes what the user sees after the next scan, and the reason matters.
 
 ## Steps
 
 1. Call `get_connection`. Find the workspace with `writable: true`. `set_signal_status` changes signals only in that workspace. Note its `waiting` and `waitingHigh` counts. If the user wants to triage another workspace, explain that this connection can only read it.
 2. Call `get_company_profile` for the writable workspace. Note the active pillars, the keywords, and the tracked competitors and prospects.
-3. Call `list_signals` with `workspace` set to the writable workspace's `ref`, `status` set to `"waiting"` and `limit` set to 25. Read the high-urgency signals first: call `list_signals` with `urgency` set to `"high"` before the rest if `waitingHigh` is above zero.
+3. Build the batch with `list_signals`. In each call, set `workspace` to the writable workspace's `ref` and `status` to `"waiting"`.
+   1. If `waitingHigh` is above zero, call it with `urgency` set to `"high"` and `limit` set to 25. Put these signals first.
+   2. Call it again with `limit` set to 25 and no `urgency`. Add the signals that the first call did not return, until the batch holds 25.
 4. Call `get_signal` for each signal in the batch. Read the summary, the relevance reason and the suggested angle.
 5. Recommend a decision for each signal. Use the decision rules below.
 6. Show the batch as a table: the title, the urgency, your recommendation, the reason, and one line of why. Ask the user to confirm, change or skip each row. Do not record a decision the user has not confirmed.
@@ -57,4 +59,4 @@ Pass `reason` only with `"clear"`. The tool refuses a reason with any other acti
 
 ## Undo a decision
 
-To undo a keep or a clear, call `set_signal_status` with `action` set to `"restore"`. The signal returns to waiting, and TrendJack drops its stored clear reason. To find a cleared signal, call `list_signals` with `status` set to `"cleared"`, or call `search` with a phrase from its title.
+To undo a keep or a clear, call `set_signal_status` with `action` set to `"restore"`. The signal returns to waiting, and TrendJack drops its stored clear reason. To find a cleared signal, call `list_signals` with `status` set to `"cleared"`, or call the TrendJack `search` tool with a phrase from its title.

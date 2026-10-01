@@ -111,6 +111,6 @@ A draft that breaks one of these rules reads as generated, whatever it says.
 
 TrendJack stores a draft in three parts:
 
-- `hook`: the opening line. For the two email formats, `update_draft_text` takes the subject line in `hook`.
-- `subject`: the subject line. Email formats only.
-- `body`: the rest of the draft, as plain prose. A blank line is a paragraph break.
+- `hook`: the opening line. For `long_form`, the hook is the headline. For the two email formats, the hook is the subject line, and `update_draft_text` takes the subject line in `hook`.
+- `subject`: the subject line. Email formats only. It holds the same text as the hook.
+- `body`: the rest of the draft, as plain prose. A blank line is a paragraph break. For the two email formats, the body starts with the greeting and ends with the sign-off.

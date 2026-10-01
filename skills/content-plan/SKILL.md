@@ -11,13 +11,12 @@ This skill turns one week of TrendJack signals into a content calendar for the c
 
 1. Call `get_connection`. Pick the workspace. Use the one the user names, or the writable one. If `profileBuilt` is false, stop and offer the onboarding skill.
 2. Call `get_company_profile` for that workspace. Note the active pillars, the voice guide, and the tracked competitors and prospects.
-3. Call `list_signals` with these arguments:
+3. Call `list_signals` twice, once with `status` set to `"kept"` and once with `status` set to `"waiting"`. Use these arguments in both calls:
    - `workspace`: the workspace from step 1
    - `since`: seven days before now, as an ISO 8601 instant
-   - `status`: `"all"`
    - `limit`: 100
 
-   Drop the signals with status cleared. Someone has already dismissed them. If `truncated` is true, say so.
+   Leave out cleared signals, because someone has already dismissed them. If either call returns `truncated: true`, say so.
 4. Ask the user two things, unless they have already said:
    - how many slots they want per week. Suggest five, one per weekday.
    - which formats they publish. The formats are `linkedin`, `x`, `long_form`, `email_prospect` and `email_journalist`.

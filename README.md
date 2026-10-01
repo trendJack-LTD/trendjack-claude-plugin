@@ -2,7 +2,7 @@
 
 TrendJack is the backend and the daily agent. This plugin is how you use it in Claude.
 
-Every weekday, TrendJack reads the news for your brand. It keeps the items that matter to your company and stores them as signals in your TrendJack workspace. The plugin connects Claude to that workspace and adds five skills. The skills tell Claude how to brief you, triage your signals, plan your content and draft posts in your brand voice.
+On weekdays, TrendJack reads the news for your brand: every weekday on a daily plan, and one weekday a week on a weekly plan. It keeps the items that matter to your company and stores them as signals in your TrendJack workspace. The plugin connects Claude to that workspace and adds five skills. The skills tell Claude how to brief you, triage your signals, plan your content and draft posts in your brand voice.
 
 ## How TrendJack differs from a skill
 
@@ -10,7 +10,7 @@ A skill is a set of instructions. It has no daily research, no stored brand prof
 
 TrendJack does the work between your conversations:
 
-- It scans the news for your company every weekday, including news about the competitors and prospects you track.
+- It scans the news for your company on a schedule, including news about the competitors and prospects you track.
 - It stores your brand profile: the voice guide, the content pillars and the alert keywords.
 - It learns from your decisions. The signals you keep and clear become examples for the next scan.
 - It writes drafts in your brand voice and keeps them in a review queue for your team.
@@ -30,7 +30,7 @@ The plugin bundles the TrendJack connection with the skills, so you install both
 | `content-plan` | Turn a week of signals into a content calendar across your pillars. |
 | `draft-post` | Draft a post, an email or a pitch from one signal, and save your edits. |
 
-The plugin contains no agents, hooks or executables.
+The plugin contains no agents, hooks or executables. `scripts/check-tools.mjs` is a repository check that CI runs. Claude never runs it, and it makes no network calls.
 
 ## Install
 
@@ -71,7 +71,7 @@ Ask Claude in plain words, for example:
 
 ## Data
 
-The plugin has no code of its own. It sends nothing until you connect the TrendJack connector. After that, Claude sends tool calls to TrendJack at `https://app.trendjack.io/api/mcp`, over HTTPS, signed in with your TrendJack account.
+The plugin runs no code of its own. It sends nothing until you connect the TrendJack connector. After that, Claude sends tool calls to TrendJack at `https://app.trendjack.io/api/mcp`, over HTTPS, signed in with your TrendJack account.
 
 Claude sends TrendJack this data:
 

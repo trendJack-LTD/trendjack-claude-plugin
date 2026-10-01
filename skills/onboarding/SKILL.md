@@ -5,7 +5,7 @@ description: Use when the user wants to set up TrendJack, build or refresh their
 
 # Build the TrendJack brand profile
 
-TrendJack reads the news for a company every weekday and keeps the items that matter to it. It judges every news item against the brand profile. The profile has three parts that you write:
+TrendJack reads the news for a company on weekdays and keeps the items that matter to it. It judges every news item against the brand profile. The profile has three parts that you write:
 
 - The **voice guide**: how the company sounds. TrendJack's drafter reads it word for word every time it writes a draft.
 - The **content pillars**: the 3 to 8 recurring themes the company can credibly post about. Every signal must justify itself against one pillar by name.
@@ -25,7 +25,7 @@ The TrendJack tools `search` and `fetch` look up stored signals. They do not rea
 4. Research the company. Follow the research rules below.
 5. Write the voice guide, the pillars and the keywords. Follow `references/profile-fields.md` for each field.
 6. Show the user the complete profile before you save it. Show the company name, the website, the LinkedIn page, the X handle, the voice guide, every pillar with its description, and every keyword. If a profile exists, say what changes from the stored one. Ask the user to confirm or correct it.
-7. Call `populate_company_profile` with the complete profile. The call replaces the stored voice guide, every pillar and every keyword, so send every field, not only the ones you changed. Keep the stored LinkedIn page and X handle unless the user changes them.
+7. Call `populate_company_profile` with the complete profile. The call replaces the stored voice guide, every pillar and every keyword, so send every field, not only the ones you changed. A stored pillar that is inactive comes back active, or goes if you leave it out. An omitted LinkedIn page or X handle keeps the stored value, so the tool cannot clear either one.
 8. Report the result from the tool's output: the workspace name, the number of pillars and keywords saved, and `onboardingComplete`. Tell the user that the next daily scan uses the new profile.
 
 If `populate_company_profile` returns an error, show the error text to the user. Fix the input it names and call the tool again only after the user agrees.
@@ -46,8 +46,8 @@ If `populate_company_profile` returns an error, show the error text to the user.
 | `linkedinUrl` | Optional. The company's LinkedIn page. |
 | `xHandle` | Optional. The company's X handle. |
 | `voiceGuide` | Required. Not empty. |
-| `pillars` | 3 to 8 items. Each has a `title` of 120 characters or fewer and a `description`. |
-| `keywords` | Not the company's own name. TrendJack drops duplicates without regard to case and keeps at most 40. |
+| `pillars` | 3 to 8 items. Each has a `title` of 120 characters or fewer and a `description`. TrendJack keeps only the first 8 and saves every pillar as active. |
+| `keywords` | Not the company's own name. TrendJack drops duplicates without regard to case, cuts each keyword to 80 characters, and keeps at most 40. |
 
 The tool leaves the hand-written language rules unchanged. Those rules live in the TrendJack app. Do not try to set them here.
 

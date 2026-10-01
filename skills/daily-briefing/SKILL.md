@@ -5,7 +5,7 @@ description: Use when the user asks what happened today, wants a morning briefin
 
 # Daily briefing
 
-A signal is one news item that TrendJack judged relevant to a workspace. TrendJack scans the news every weekday and stores new signals with status waiting. This skill briefs the user on the recent ones, most urgent first.
+A signal is one news item that TrendJack judged relevant to a workspace. TrendJack scans the news on weekdays and stores new signals with status waiting. A daily plan scans every weekday. A weekly plan scans one weekday a week. This skill briefs the user on the recent ones, most urgent first.
 
 ## Steps
 
@@ -23,7 +23,7 @@ A signal is one news item that TrendJack judged relevant to a workspace. TrendJa
    - `limit`: 50
 
    If `truncated` is true, say how many signals you read and that more exist.
-4. If the list is empty, say that no new signals arrived in the last 48 hours. Give `lastCompletedRunOn` from step 1. Stop there.
+4. If the list is empty, say that no new signals arrived in the last 48 hours. Give `lastCompletedRunOn` from step 1. If that date is more than two days ago, the workspace may scan weekly. Offer a briefing on the last seven days instead. Stop there.
 5. Call `get_signal` for each signal you will write about. Read high-urgency signals first. Read at most 15 signals. `list_signals` gives only a short entry, and `get_signal` adds the summary, the relevance reason, the suggested angle and the article link.
 6. Write the briefing in the shape below.
 

@@ -1,6 +1,6 @@
 # How to write each profile field
 
-TrendJack reads these three fields every day. The daily scan judges news against the pillars and the keywords. The drafter reads the voice guide word for word.
+trendJack reads these three fields every day. The daily scan judges news against the pillars and the keywords. The drafter reads the voice guide word for word.
 
 ## Voice guide
 
@@ -27,7 +27,7 @@ For each pillar:
 - Give it a short title, 120 characters or fewer.
 - Write a description of one or two sentences that says what belongs under it.
 
-A pillar you cannot point to a page for does not belong. TrendJack judges every signal against these pillars by name, so a vague pillar makes the daily scan vague.
+A pillar you cannot point to a page for does not belong. trendJack judges every signal against these pillars by name, so a vague pillar makes the daily scan vague.
 
 A good pillar names a subject the company has a position on, for example "Warehouse automation for mid-size grocers". A bad pillar names a category that fits anyone, for example "Innovation" or "Thought leadership".
 
@@ -40,6 +40,6 @@ An alert keyword is a term that should make a news item relevant to the company.
 - its customers' industries
 - the problems it sells against
 
-Do not include the company's own name. TrendJack is for finding news to comment on, not press mentions.
+Do not include the company's own name. trendJack is for finding news to comment on, not press mentions.
 
-TrendJack matches the keywords against the news every day. A keyword that is too generic floods the workspace. A keyword that is too narrow starves it. Prefer two-word or three-word terms to single generic words. TrendJack keeps at most 40 keywords and drops duplicates without regard to case.
+trendJack matches the keywords against the news every day. A keyword that is too generic floods the workspace. A keyword that is too narrow starves it. Prefer two-word or three-word terms to single generic words. trendJack keeps at most 40 keywords and drops duplicates without regard to case.

@@ -1,0 +1,26 @@
+name: Check the live server
+
+# Separate from validate.yml: a server deploy, not a commit here, can break this check.
+on:
+  schedule:
+    - cron: "17 7 * * *"
+  workflow_dispatch:
+    inputs:
+      mcp_url:
+        description: MCP URL to check. Leave empty for the tools.json url.
+        required: false
+
+jobs:
+  live:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Check that the server serves everything in tools.json
+        run: node scripts/check-live.mjs
+        env:
+          MCP_URL: ${{ inputs.mcp_url }}

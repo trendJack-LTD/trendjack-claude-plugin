@@ -1,17 +1,32 @@
 ---
 name: triage
-description: Use when the user wants to go through their waiting TrendJack signals, clear the queue, decide what to keep, dismiss signals that do not fit, or undo a decision on a signal. Claude reads each waiting signal against the brand profile, recommends keep or clear with a reason, asks the user to confirm, and records each decision with set_signal_status. Kept and cleared signals teach the daily scan what the company wants.
+description: Use when the user wants to go through their waiting trendJack signals, clear the queue, decide what to keep, dismiss signals that do not fit, or undo a decision on a signal. Claude reads each waiting signal against the brand profile, recommends keep or clear with a reason, asks the user to confirm, and records each decision with set_signal_status. Kept and cleared signals teach the daily scan what the company wants.
 ---
 
 # Triage waiting signals
 
-A signal is one news item that TrendJack judged relevant to a workspace. Each signal has one of three statuses:
+A signal is one news item that trendJack judged relevant to a workspace. Each signal has one of three statuses:
 
 - **waiting**: no one has decided yet
 - **kept**: someone has taken it on
 - **cleared**: dismissed, with an optional reason
 
-TrendJack uses kept and cleared signals as examples for its next scan. It scores a story like the kept ones higher and a story like the cleared ones lower. A clear with reason `no_time` is the exception: it teaches the scan nothing. So each decision changes what the user sees after the next scan, and the reason matters.
+trendJack uses kept and cleared signals as examples for its next scan. It scores a story like the kept ones higher and a story like the cleared ones lower. A clear with reason `no_time` is the exception: it teaches the scan nothing. So each decision changes what the user sees after the next scan, and the reason matters.
+
+## If the trendJack tools are missing
+
+The trendJack tools come from the trendJack connector, for example `get_connection` and `list_signals`. Some apps load connector tools only when needed. Search your tools for "trendJack" before you decide they are missing. Other connectors can also have tools named `search` and `fetch`. Use the ones from trendJack.
+
+If a trendJack tool call asks the user to connect, wait until they finish. Then make the same call again.
+
+If the tools are still missing, trendJack is not connected yet. Say so in one sentence, then give the steps for the user's app:
+
+- **Claude Code:** if you have a trendJack `authenticate` tool, call it and give the user the link it returns. Otherwise, ask the user to run `/mcp`, pick trendJack and choose **Authenticate**.
+- **claude.ai and Claude Desktop:** ask the user to open **Customize > Plugins > trendJack > Connectors** and select **Connect** next to trendJack.
+
+trendJack then asks the user to sign in or create an account, and to pick the workspace that Claude saves to. If the tools still do not appear after the user connects, ask them to start a new chat. Never tell the user to disconnect and connect again when trendJack was never connected.
+
+When you talk to the user, call the workspace with `writable: true` the workspace they connected. Do not call it "writable".
 
 ## Steps
 
@@ -51,7 +66,7 @@ Pass `reason` only with `"clear"`. The tool refuses a reason with any other acti
 ## Quality bar
 
 - Each recommendation names the pillar, keyword or tracked company that it turns on. "Seems relevant" fails.
-- The relevance reason is TrendJack's view, not the last word. Disagree with it when the profile says otherwise.
+- The relevance reason is trendJack's view, not the last word. Disagree with it when the profile says otherwise.
 - Use `not_relevant` honestly. A story that is relevant but badly angled is `not_our_angle`. The two reasons teach the scan different things.
 - Prefer `no_time` to a wrong reason when the user is only busy.
 - When two signals cover the same news event, keep the one with the better source and clear the other with `already_covered`.
@@ -59,4 +74,4 @@ Pass `reason` only with `"clear"`. The tool refuses a reason with any other acti
 
 ## Undo a decision
 
-To undo a keep or a clear, call `set_signal_status` with `action` set to `"restore"`. The signal returns to waiting, and TrendJack drops its stored clear reason. To find a cleared signal, call `list_signals` with `status` set to `"cleared"`, or call the TrendJack `search` tool with a phrase from its title.
+To undo a keep or a clear, call `set_signal_status` with `action` set to `"restore"`. The signal returns to waiting, and trendJack drops its stored clear reason. To find a cleared signal, call `list_signals` with `status` set to `"cleared"`, or call the trendJack `search` tool with a phrase from its title.

@@ -1,6 +1,6 @@
 # Drafting rules
 
-These are the rules TrendJack's own drafter follows. Use them when you write a draft or an alternative in chat, so that a chat draft reads like a TrendJack draft.
+These are the rules trendJack's own drafter follows. Use them when you write a draft or an alternative in chat, so that a chat draft reads like a trendJack draft.
 
 ## Order of authority
 
@@ -109,7 +109,7 @@ A draft that breaks one of these rules reads as generated, whatever it says.
 
 ## Where the parts go
 
-TrendJack stores a draft in three parts:
+trendJack stores a draft in three parts:
 
 - `hook`: the opening line. For `long_form`, the hook is the headline. For the two email formats, the hook is the subject line, and `update_draft_text` takes the subject line in `hook`.
 - `subject`: the subject line. Email formats only. It holds the same text as the hook.

@@ -1,45 +1,40 @@
-# TrendJack plugins for Claude
+# trendJack plugin for Claude
 
-This repository is a Claude plugin marketplace. It holds two plugins:
+This repository is a Claude plugin marketplace. It holds one plugin, `trendjack`, which connects to `https://app.trendjack.io/api/mcp`.
 
-| Plugin | Connects to | Who it is for |
-|---|---|---|
-| `trendjack` | `https://app.trendjack.io/api/mcp` | TrendJack customers |
-| `trendjack-dev` | `https://app.dev.trendjack.io/api/mcp` | The TrendJack team, to test changes on the dev deployment |
-
-[`plugins/trendjack/README.md`](plugins/trendjack/README.md) describes the plugin, its skills and the data it sends.
+[`plugins/trendjack/README.md`](plugins/trendjack/README.md) describes the plugin, how to connect it, its skills and the data it sends.
 
 ## Change a skill
 
-1. Edit the files in `plugins/trendjack/`. Never edit `plugins/trendjack-dev/` by hand.
-2. Run `node scripts/build-dev.mjs` to rebuild `plugins/trendjack-dev/`.
-3. Run `node scripts/check-tools.mjs`. It fails when a skill names a tool, an argument or a field that `tools.json` does not list.
-4. Run `scripts/validate.sh`. It runs `claude plugin validate --strict` on the marketplace and on each plugin.
-5. Commit both plugin folders together. CI fails when the dev copy is stale.
+1. Edit the files in `plugins/trendjack/`.
+2. Run `node scripts/check-tools.mjs`. It fails in these cases:
+   - a skill names a tool, an argument or a field that `tools.json` does not list;
+   - a skill does not contain `scripts/connect-section.md` word for word;
+   - `.mcp.json` names a server or URL that differs from `tools.json`.
+3. Run `scripts/validate.sh`. It runs `claude plugin validate --strict` on the marketplace and on the plugin.
 
-When the TrendJack MCP server adds, renames or removes a tool, update `tools.json` first.
+To change what Claude says when trendJack is not connected, edit `scripts/connect-section.md`. Then paste the new text into every `SKILL.md`.
 
-## Test on the dev deployment
+When the trendJack MCP server adds, renames or removes a tool, update `tools.json` first.
 
-The dev deployment must be reachable from the internet. Vercel Deployment Protection must list `app.dev.trendjack.io` as an exception, or Claude cannot complete OAuth.
+## Check the live server
 
-On claude.ai:
+`node scripts/check-live.mjs` lists the tools on the live server without a token. It fails when the server does not serve every tool, field and enum value in `tools.json`. Set `MCP_URL` to check another deployment.
 
-1. Go to **Customize > Plugins > Add > Add marketplace** and enter `trendJack-LTD/trendjack-claude-plugin`. While the repository is private, connect GitHub and give the Claude GitHub App access to it.
-2. Install **TrendJack (dev)**.
-3. Open its **Connectors** tab, connect, and sign in with your dev account.
-4. After you push a change, open the marketplace and select **Check for updates**, or turn on **Sync automatically**.
+The **Check the live server** workflow runs this check every day, and you can run it by hand from the Actions tab. It fails when production is behind the plugin, for example before `dev` is merged into `main` in the app repository.
 
-In Claude Code:
+## Test a change before release
+
+In Claude Code, load the plugin from your checkout:
 
 ```bash
-claude plugin marketplace add trendJack-LTD/trendjack-claude-plugin
-claude plugin install trendjack-dev@trendjack
-claude plugin marketplace update trendjack   # after each push
+claude --plugin-dir ./plugins/trendjack
 ```
 
-Start a session and run `/mcp` to sign in. The skills appear as `/trendjack-dev:<skill>`.
+Run `/mcp` to connect. To test against another deployment, change the URL in `plugins/trendjack/.mcp.json` for that session only, and do not commit it.
+
+On claude.ai, add this repository as a marketplace and install the plugin from the branch you pushed. Select **Check for updates** after each push.
 
 ## Branches
 
-`dev` is the default branch, and all changes land there first. `main` is the release branch that Anthropic's directory tracks. Remove the `trendjack-dev` entry from `marketplace.json` before the repository goes public.
+`dev` is the default branch, and all changes land there first. `main` is the release branch that Anthropic's directory tracks.

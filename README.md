@@ -1,92 +1,45 @@
-# TrendJack for Claude
+# TrendJack plugins for Claude
 
-TrendJack is the backend and the daily agent. This plugin is how you use it in Claude.
+This repository is a Claude plugin marketplace. It holds two plugins:
 
-On weekdays, TrendJack reads the news for your brand: every weekday on a daily plan, and one weekday a week on a weekly plan. It keeps the items that matter to your company and stores them as signals in your TrendJack workspace. The plugin connects Claude to that workspace and adds five skills. The skills tell Claude how to brief you, triage your signals, plan your content and draft posts in your brand voice.
+| Plugin | Connects to | Who it is for |
+|---|---|---|
+| `trendjack` | `https://app.trendjack.io/api/mcp` | TrendJack customers |
+| `trendjack-dev` | `https://app.dev.trendjack.io/api/mcp` | The TrendJack team, to test changes on the dev deployment |
 
-## How TrendJack differs from a skill
+[`plugins/trendjack/README.md`](plugins/trendjack/README.md) describes the plugin, its skills and the data it sends.
 
-A skill is a set of instructions. It has no daily research, no stored brand profile and no signal history. Without TrendJack, a skill can only work with what you paste into the chat.
+## Change a skill
 
-TrendJack does the work between your conversations:
+1. Edit the files in `plugins/trendjack/`. Never edit `plugins/trendjack-dev/` by hand.
+2. Run `node scripts/build-dev.mjs` to rebuild `plugins/trendjack-dev/`.
+3. Run `node scripts/check-tools.mjs`. It fails when a skill names a tool, an argument or a field that `tools.json` does not list.
+4. Run `scripts/validate.sh`. It runs `claude plugin validate --strict` on the marketplace and on each plugin.
+5. Commit both plugin folders together. CI fails when the dev copy is stale.
 
-- It scans the news for your company on a schedule, including news about the competitors and prospects you track.
-- It stores your brand profile: the voice guide, the content pillars and the alert keywords.
-- It learns from your decisions. The signals you keep and clear become examples for the next scan.
-- It writes drafts in your brand voice and keeps them in a review queue for your team.
+When the TrendJack MCP server adds, renames or removes a tool, update `tools.json` first.
 
-The plugin bundles the TrendJack connection with the skills, so you install both in one step.
+## Test on the dev deployment
 
-## What the plugin contains
+The dev deployment must be reachable from the internet. Vercel Deployment Protection must list `app.dev.trendjack.io` as an exception, or Claude cannot complete OAuth.
 
-- **A connector** to the TrendJack MCP server at `https://app.trendjack.io/api/mcp`.
-- **Five skills:**
+On claude.ai:
 
-| Skill | Use it to |
-| --- | --- |
-| `onboarding` | Research your company and save its brand profile to TrendJack. |
-| `daily-briefing` | Get a briefing on the last 48 hours of signals, most urgent first. |
-| `triage` | Go through the waiting signals and keep or clear each one. |
-| `content-plan` | Turn a week of signals into a content calendar across your pillars. |
-| `draft-post` | Draft a post, an email or a pitch from one signal, and save your edits. |
+1. Go to **Customize > Plugins > Add > Add marketplace** and enter `trendJack-LTD/trendjack-claude-plugin`. While the repository is private, connect GitHub and give the Claude GitHub App access to it.
+2. Install **TrendJack (dev)**.
+3. Open its **Connectors** tab, connect, and sign in with your dev account.
+4. After you push a change, open the marketplace and select **Check for updates**, or turn on **Sync automatically**.
 
-The plugin contains no agents, hooks or executables. `scripts/check-tools.mjs` is a repository check that CI runs. Claude never runs it, and it makes no network calls.
-
-## Install
-
-You need a TrendJack account with at least one workspace. Sign up at [app.trendjack.io](https://app.trendjack.io).
-
-### On claude.ai
-
-1. Go to **Customize > Plugins > Add > Add marketplace**.
-2. Enter the repository URL: `https://github.com/trendJack-LTD/trendjack-claude-plugin`.
-3. Install the **TrendJack** plugin.
-4. Open the plugin's **Connectors** tab and connect the TrendJack connector.
-5. Sign in to TrendJack and choose the workspace that Claude may write to.
-
-On Team and Enterprise plans, an Owner adds the connector for the organization first. Each member then connects with their own TrendJack account.
-
-If you already added the TrendJack connector, the plugin uses the same URL. You see one set of TrendJack tools, not two.
-
-### In Claude Code
-
-Run these commands in your shell:
+In Claude Code:
 
 ```bash
 claude plugin marketplace add trendJack-LTD/trendjack-claude-plugin
-claude plugin install trendjack@trendjack
+claude plugin install trendjack-dev@trendjack
+claude plugin marketplace update trendjack   # after each push
 ```
 
-Start a session and run `/mcp`. Select the `trendjack` server and sign in to TrendJack. The skills appear as `/trendjack:daily-briefing`, `/trendjack:triage` and so on. Claude also loads each skill when your request matches it.
+Start a session and run `/mcp` to sign in. The skills appear as `/trendjack-dev:<skill>`.
 
-## Use it
+## Branches
 
-Ask Claude in plain words, for example:
-
-- "Set up TrendJack for acme.com."
-- "What happened in my world today?"
-- "Go through my waiting signals."
-- "Plan next week's posts from this week's signals."
-- "Draft a LinkedIn post from the first signal."
-
-## Data
-
-The plugin runs no code of its own. It sends nothing until you connect the TrendJack connector. After that, Claude sends tool calls to TrendJack at `https://app.trendjack.io/api/mcp`, over HTTPS, signed in with your TrendJack account.
-
-Claude sends TrendJack this data:
-
-- the brand profile that the onboarding skill writes: your website, company name, LinkedIn page, X handle, voice guide, content pillars and alert keywords
-- your decisions on signals: keep, clear and the clear reason
-- requests for drafts: a signal id and a format
-- the text of drafts you edit
-- your search queries over your signals, and the filters you choose when you list signals or drafts
-
-TrendJack returns your workspaces, your brand profile, your signals and your drafts. Claude reads them in your conversation.
-
-Reads can cover every workspace you authorised for the connection. Writes go only to the one workspace you chose when you connected. No tool posts, sends or publishes anything: drafts stay in TrendJack until you publish them yourself.
-
-When you create a draft, TrendJack writes it with its own drafting model. For onboarding, Claude reads your company's public website, LinkedIn page and X profile with Claude's own web tools. TrendJack does not fetch those pages for the plugin.
-
-## License
-
-MIT. See [LICENSE](LICENSE).
+`dev` is the default branch, and all changes land there first. `main` is the release branch that Anthropic's directory tracks. Remove the `trendjack-dev` entry from `marketplace.json` before the repository goes public.

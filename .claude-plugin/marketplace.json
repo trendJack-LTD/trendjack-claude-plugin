@@ -8,8 +8,13 @@
   "plugins": [
     {
       "name": "trendjack",
-      "source": "./",
+      "source": "./plugins/trendjack",
       "description": "Build your brand profile, brief you on new signals, triage them, plan a week of content and draft posts in your brand voice, all from TrendJack data."
+    },
+    {
+      "name": "trendjack-dev",
+      "source": "./plugins/trendjack-dev",
+      "description": "Development build of the TrendJack plugin. It connects to app.dev.trendjack.io. For the TrendJack team only."
     }
   ]
 }

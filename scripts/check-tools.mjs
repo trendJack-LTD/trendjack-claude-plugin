@@ -61,68 +61,77 @@ function frontmatter(text) {
   return { entries, problems: found };
 }
 
-const skillsDir = join(root, "skills");
-const skillFolders = readdirSync(skillsDir).filter((entry) =>
-  statSync(join(skillsDir, entry)).isDirectory(),
-);
+const pluginsDir = join(root, "plugins");
+const plugins = readdirSync(pluginsDir).filter((entry) => statSync(join(pluginsDir, entry)).isDirectory());
+let skillCount = 0;
 
-for (const folder of skillFolders) {
-  const skillPath = join(skillsDir, folder, "SKILL.md");
-  let text;
-  try {
-    text = readFileSync(skillPath, "utf8");
-  } catch {
-    problems.push(`skills/${folder}: SKILL.md is missing`);
-    continue;
-  }
+for (const plugin of plugins) {
+  const skillsDir = join(pluginsDir, plugin, "skills");
+  const skillsRel = relative(root, skillsDir);
+  const skillFolders = readdirSync(skillsDir).filter((entry) =>
+    statSync(join(skillsDir, entry)).isDirectory(),
+  );
+  skillCount += skillFolders.length;
 
-  if (!SKILL_NAME.test(folder) || folder.length > MAX_SKILL_NAME) {
-    problems.push(
-      `skills/${folder}: a skill name is lowercase letters, digits and single hyphens, ${MAX_SKILL_NAME} characters or fewer`,
-    );
-  }
 
-  const parsed = frontmatter(text);
-  if (!parsed) {
-    problems.push(`skills/${folder}/SKILL.md: frontmatter is missing`);
-  } else {
-    const { entries } = parsed;
-    for (const problem of parsed.problems) problems.push(`skills/${folder}/SKILL.md: ${problem}`);
-    if (entries.name !== folder) {
-      problems.push(`skills/${folder}/SKILL.md: name "${entries.name}" does not match the folder`);
+  for (const folder of skillFolders) {
+    const skillPath = join(skillsDir, folder, "SKILL.md");
+    let text;
+    try {
+      text = readFileSync(skillPath, "utf8");
+    } catch {
+      problems.push(`${skillsRel}/${folder}: SKILL.md is missing`);
+      continue;
     }
-    if (!entries.description) {
-      problems.push(`skills/${folder}/SKILL.md: description is missing`);
-    } else if (entries.description.length > MAX_DESCRIPTION) {
+
+    if (!SKILL_NAME.test(folder) || folder.length > MAX_SKILL_NAME) {
       problems.push(
-        `skills/${folder}/SKILL.md: description has ${entries.description.length} characters, over ${MAX_DESCRIPTION}`,
+        `${skillsRel}/${folder}: a skill name is lowercase letters, digits and single hyphens, ${MAX_SKILL_NAME} characters or fewer`,
       );
     }
+
+    const parsed = frontmatter(text);
+    if (!parsed) {
+      problems.push(`${skillsRel}/${folder}/SKILL.md: frontmatter is missing`);
+    } else {
+      const { entries } = parsed;
+      for (const problem of parsed.problems) problems.push(`${skillsRel}/${folder}/SKILL.md: ${problem}`);
+      if (entries.name !== folder) {
+        problems.push(`${skillsRel}/${folder}/SKILL.md: name "${entries.name}" does not match the folder`);
+      }
+      if (!entries.description) {
+        problems.push(`${skillsRel}/${folder}/SKILL.md: description is missing`);
+      } else if (entries.description.length > MAX_DESCRIPTION) {
+        problems.push(
+          `${skillsRel}/${folder}/SKILL.md: description has ${entries.description.length} characters, over ${MAX_DESCRIPTION}`,
+        );
+      }
+    }
+
+    const lines = text.split("\n").length;
+    if (lines >= MAX_SKILL_LINES) {
+      problems.push(`${skillsRel}/${folder}/SKILL.md: ${lines} lines, the limit is under ${MAX_SKILL_LINES}`);
+    }
   }
 
-  const lines = text.split("\n").length;
-  if (lines >= MAX_SKILL_LINES) {
-    problems.push(`skills/${folder}/SKILL.md: ${lines} lines, the limit is under ${MAX_SKILL_LINES}`);
-  }
-}
+  for (const file of markdownFiles(skillsDir)) {
+    const name = relative(root, file);
+    const text = readFileSync(file, "utf8");
 
-for (const file of markdownFiles(skillsDir)) {
-  const name = relative(root, file);
-  const text = readFileSync(file, "utf8");
+    for (const match of text.matchAll(PREFIXED_TOOL)) {
+      problems.push(`${name}: "${match[0]}" is a client-prefixed name; use the bare tool name`);
+    }
 
-  for (const match of text.matchAll(PREFIXED_TOOL)) {
-    problems.push(`${name}: "${match[0]}" is a client-prefixed name; use the bare tool name`);
-  }
+    for (const match of text.matchAll(SNAKE_CASE)) {
+      const word = match[0];
+      if (tools.has(word) || enumValues.has(word)) continue;
+      problems.push(`${name}: "${word}" is not a tool or enum value in tools.json`);
+    }
 
-  for (const match of text.matchAll(SNAKE_CASE)) {
-    const word = match[0];
-    if (tools.has(word) || enumValues.has(word)) continue;
-    problems.push(`${name}: "${word}" is not a tool or enum value in tools.json`);
-  }
-
-  for (const match of text.matchAll(CAMEL_CASE_CODE)) {
-    if (fields.has(match[1])) continue;
-    problems.push(`${name}: "${match[1]}" is not an argument or field in tools.json`);
+    for (const match of text.matchAll(CAMEL_CASE_CODE)) {
+      if (fields.has(match[1])) continue;
+      problems.push(`${name}: "${match[1]}" is not an argument or field in tools.json`);
+    }
   }
 }
 
@@ -133,5 +142,5 @@ if (problems.length > 0) {
 }
 
 console.log(
-  `check-tools: ${skillFolders.length} skills name only the ${tools.size} tools and the ${fields.size} fields in tools.json`,
+  `check-tools: ${skillCount} skills in ${plugins.length} plugins name only the ${tools.size} tools and the ${fields.size} fields in tools.json`,
 );

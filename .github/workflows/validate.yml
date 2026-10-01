@@ -1,4 +1,4 @@
-name: Validate plugin
+name: Validate plugins
 
 on:
   push:
@@ -18,12 +18,11 @@ jobs:
       - name: Install Claude Code
         run: npm install -g @anthropic-ai/claude-code@2.1.286
 
-      - name: Validate the marketplace
-        run: claude plugin validate --strict .
-
-      # A directory that holds marketplace.json validates only that file, so the plugin needs its own run.
-      - name: Validate the plugin, its skills and its MCP config
-        run: claude plugin validate --strict ./.claude-plugin/plugin.json
+      - name: Validate the marketplace and each plugin
+        run: scripts/validate.sh
 
       - name: Check the tool names in the skills
         run: node scripts/check-tools.mjs
+
+      - name: Check that the dev plugin matches the production plugin
+        run: node scripts/build-dev.mjs --check

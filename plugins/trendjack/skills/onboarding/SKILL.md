@@ -1,25 +1,40 @@
 ---
 name: onboarding
-description: Use when the user wants to set up TrendJack, build or refresh their company's brand profile, or change the voice guide, content pillars or alert keywords. Also use when another TrendJack skill finds that the profile is not built or that daily signals are paused. Claude researches the company's own website, LinkedIn and X pages, writes the voice guide, the content pillars and the alert keywords, shows them to the user, and saves the complete profile to the TrendJack workspace with populate_company_profile.
+description: Use when the user wants to set up trendJack, build or refresh their company's brand profile, or change the voice guide, content pillars or alert keywords. Also use when another trendJack skill finds that the profile is not built or that daily signals are paused. Claude researches the company's own website, LinkedIn and X pages, writes the voice guide, the content pillars and the alert keywords, shows them to the user, and saves the complete profile to the trendJack workspace with populate_company_profile.
 ---
 
-# Build the TrendJack brand profile
+# Build the trendJack brand profile
 
-TrendJack reads the news for a company on weekdays and keeps the items that matter to it. It judges every news item against the brand profile. The profile has three parts that you write:
+trendJack reads the news for a company on weekdays and keeps the items that matter to it. It judges every news item against the brand profile. The profile has three parts that you write:
 
-- The **voice guide**: how the company sounds. TrendJack's drafter reads it word for word every time it writes a draft.
+- The **voice guide**: how the company sounds. trendJack's drafter reads it word for word every time it writes a draft.
 - The **content pillars**: the 3 to 8 recurring themes the company can credibly post about. Every signal must justify itself against one pillar by name.
-- The **alert keywords**: the terms that make news relevant to the company. TrendJack matches them against the news every day.
+- The **alert keywords**: the terms that make news relevant to the company. trendJack matches them against the news every day.
 
 You do the research yourself, then save the result with `populate_company_profile`. A vague profile makes the daily scan vague, so the quality bar below matters more than speed.
 
 ## Before you start
 
-The TrendJack tools `search` and `fetch` look up stored signals. They do not read the web. For the research, use your own web search and web fetch tools. If you have no tool that opens a web page, tell the user. Ask them to paste the text of the home page, the about page and the product pages instead.
+The trendJack tools `search` and `fetch` look up stored signals. They do not read the web. For the research, use your own web search and web fetch tools. If you have no tool that opens a web page, tell the user. Ask them to paste the text of the home page, the about page and the product pages instead.
+
+## If the trendJack tools are missing
+
+The trendJack tools come from the trendJack connector, for example `get_connection` and `list_signals`. Some apps load connector tools only when needed. Search your tools for "trendJack" before you decide they are missing. Other connectors can also have tools named `search` and `fetch`. Use the ones from trendJack.
+
+If a trendJack tool call asks the user to connect, wait until they finish. Then make the same call again.
+
+If the tools are still missing, trendJack is not connected yet. Say so in one sentence, then give the steps for the user's app:
+
+- **Claude Code:** if you have a trendJack `authenticate` tool, call it and give the user the link it returns. Otherwise, ask the user to run `/mcp`, pick trendJack and choose **Authenticate**.
+- **claude.ai and Claude Desktop:** ask the user to open **Customize > Plugins > trendJack > Connectors** and select **Connect** next to trendJack.
+
+trendJack then asks the user to sign in or create an account, and to pick the workspace that Claude saves to. If the tools still do not appear after the user connects, ask them to start a new chat. Never tell the user to disconnect and connect again when trendJack was never connected.
+
+When you talk to the user, call the workspace with `writable: true` the workspace they connected. Do not call it "writable".
 
 ## Steps
 
-1. Call `get_connection`. Find the one workspace with `writable: true`. That is the only workspace `populate_company_profile` can write to. Tell the user its name before you go on. If the user names a different workspace, explain that this connection writes only to the writable one. They can reconnect TrendJack and choose the other workspace.
+1. Call `get_connection`. Find the one workspace with `writable: true`. That is the only workspace `populate_company_profile` can write to. Tell the user its name before you go on. If the user names a different workspace, explain that this connection saves only to the workspace they picked when they connected. To save to another one, they disconnect trendJack and connect again, picking that workspace on the trendJack page.
 2. Call `get_company_profile` with `workspace` set to the writable workspace's `ref`. Note what is stored today: the website, the LinkedIn page, the X handle, the voice guide, the pillars, the keywords and the language rules.
 3. Get the website. Use the website the user gives you. Otherwise use `websiteUrl` from the stored profile. If neither exists, ask the user for it and stop until they reply. Every field must come from the company's own pages.
 4. Research the company. Follow the research rules below.
@@ -46,10 +61,10 @@ If `populate_company_profile` returns an error, show the error text to the user.
 | `linkedinUrl` | Optional. The company's LinkedIn page. |
 | `xHandle` | Optional. The company's X handle. |
 | `voiceGuide` | Required. Not empty. |
-| `pillars` | 3 to 8 items. Each has a `title` of 120 characters or fewer and a `description`. TrendJack keeps only the first 8 and saves every pillar as active. |
-| `keywords` | Not the company's own name. TrendJack drops duplicates without regard to case, cuts each keyword to 80 characters, and keeps at most 40. |
+| `pillars` | 3 to 8 items. Each has a `title` of 120 characters or fewer and a `description`. trendJack keeps only the first 8 and saves every pillar as active. |
+| `keywords` | Not the company's own name. trendJack drops duplicates without regard to case, cuts each keyword to 80 characters, and keeps at most 40. |
 
-The tool leaves the hand-written language rules unchanged. Those rules live in the TrendJack app. Do not try to set them here.
+The tool leaves the hand-written language rules unchanged. Those rules live in the trendJack app. Do not try to set them here.
 
 ## Quality bar
 

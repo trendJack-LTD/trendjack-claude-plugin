@@ -1,11 +1,11 @@
 ---
 name: draft-post
-description: Use when the user wants a post, an email, a pitch or a media comment written from a TrendJack signal or a news story TrendJack found, or wants to edit and save a TrendJack draft. Claude asks TrendJack to write the draft in the brand voice with create_draft, offers one alternative, and saves the user's edits with update_draft_text. Claude writes the draft in chat for a media comment, an executive voice, or a signal from a workspace this connection cannot write to.
+description: Use when the user wants a post, an email, a pitch or a media comment written from a trendJack signal or a news story trendJack found, or wants to edit and save a trendJack draft. Claude asks trendJack to write the draft in the brand voice with create_draft, offers one alternative, and saves the user's edits with update_draft_text. Claude writes the draft in chat for a media comment, an executive voice, or a signal from a workspace this connection cannot write to.
 ---
 
 # Draft a post from a signal
 
-TrendJack writes drafts in the brand voice of the workspace this connection writes to. A draft stays in TrendJack. No tool posts, sends or publishes anything.
+trendJack writes drafts in the brand voice of the workspace this connection writes to. A draft stays in trendJack. No tool posts, sends or publishes anything.
 
 Draft formats:
 
@@ -17,19 +17,34 @@ Draft formats:
 | `email_prospect` | A cold email to a prospect |
 | `email_journalist` | A pitch to a journalist |
 
+## If the trendJack tools are missing
+
+The trendJack tools come from the trendJack connector, for example `get_connection` and `list_signals`. Some apps load connector tools only when needed. Search your tools for "trendJack" before you decide they are missing. Other connectors can also have tools named `search` and `fetch`. Use the ones from trendJack.
+
+If a trendJack tool call asks the user to connect, wait until they finish. Then make the same call again.
+
+If the tools are still missing, trendJack is not connected yet. Say so in one sentence, then give the steps for the user's app:
+
+- **Claude Code:** if you have a trendJack `authenticate` tool, call it and give the user the link it returns. Otherwise, ask the user to run `/mcp`, pick trendJack and choose **Authenticate**.
+- **claude.ai and Claude Desktop:** ask the user to open **Customize > Plugins > trendJack > Connectors** and select **Connect** next to trendJack.
+
+trendJack then asks the user to sign in or create an account, and to pick the workspace that Claude saves to. If the tools still do not appear after the user connects, ask them to start a new chat. Never tell the user to disconnect and connect again when trendJack was never connected.
+
+When you talk to the user, call the workspace with `writable: true` the workspace they connected. Do not call it "writable".
+
 ## Steps
 
 1. **Find the signal.**
    - If the user gives a signal id, call `get_signal` with it.
-   - If the user describes a story, call the TrendJack `search` tool with a short query, not a web search. Pick the result that matches, then call `get_signal` with its `id`. If several results match, ask the user which one.
+   - If the user describes a story, call the trendJack `search` tool with a short query, not a web search. Pick the result that matches, then call `get_signal` with its `id`. If several results match, ask the user which one.
 2. **Find the workspace.** Call `get_connection`. Check that the signal's `workspace` is the workspace with `writable: true`. If it is not, go to "Draft in chat".
 3. **Pick the format.** Use the format the user asks for. Otherwise use `linkedin`. If the user asks for a media comment or a post in an executive's voice, go to "Draft in chat".
 4. **Create the draft.** Call `create_draft` with `signalId` and `format`. Each call writes a new draft and spends model tokens, so call it once per request.
    - If `alreadyRunning` is true, a draft for this signal and format is already in progress. Do not call `create_draft` again. Treat the returned draft by its `status`, as below.
-   - If the draft `status` is `running`, TrendJack is still writing it. A draft takes up to about a minute. Write the alternative from step 6 first, then call `list_drafts` with `draftId`. Check at most three times. If it is still running, tell the user the draft is in their TrendJack queue and they can ask for it later.
+   - If the draft `status` is `running`, trendJack is still writing it. A draft takes up to about a minute. Write the alternative from step 6 first, then call `list_drafts` with `draftId`. Check at most three times. If it is still running, tell the user the draft is in their trendJack queue and they can ask for it later.
    - If the `status` is `failed`, show `failureReason`. Offer to try again once, or to draft in chat.
    - If the tool returns an error, follow "When create_draft refuses".
-5. **Show the draft.** Show the hook and the body exactly as TrendJack wrote them. For `long_form`, the hook is the headline. For the two email formats, the hook is the subject line, and the body runs from the greeting to the sign-off. Say which content pillar it ties to.
+5. **Show the draft.** Show the hook and the body exactly as trendJack wrote them. For `long_form`, the hook is the headline. For the two email formats, the hook is the subject line, and the body runs from the greeting to the sign-off. Say which content pillar it ties to.
 6. **Offer one alternative.** Write one alternative in chat, so the user has two to choose between. Follow `references/drafting-rules.md`. Get the voice guide, the language rules and the pillars from `get_company_profile` for the signal's workspace.
 7. **Save the user's choice.** If the user picks the alternative or edits the draft, save the text:
    1. Call `list_drafts` with `draftId`. Check that `editable` is true. A draft is editable only when it is complete, its review status is draft or `changes_requested`, and it is in the writable workspace.
@@ -54,7 +69,7 @@ Show the error text to the user in each case.
 
 Write the draft yourself in these cases:
 
-- The user wants a media comment. TrendJack's drafter needs an executive for this format, and no tool exposes executives.
+- The user wants a media comment. trendJack's drafter needs an executive for this format, and no tool exposes executives.
 - The user wants the post in an executive's own voice. Ask for the executive's name and role.
 - The signal is in a workspace this connection cannot write to.
 - `create_draft` refused and the user wants a draft now.
@@ -65,11 +80,11 @@ To draft in chat:
 2. Use the signal from `get_signal`: the title, the source, the summary, the relevance reason, the suggested angle and the urgency.
 3. Write two alternatives. Follow `references/drafting-rules.md` for the format.
 4. Say which pillar each alternative ties to.
-5. Tell the user that a chat draft is not saved in TrendJack.
+5. Tell the user that a chat draft is not saved in trendJack.
 
 ## Edit an existing draft
 
-If the user wants to change a draft that is already in TrendJack:
+If the user wants to change a draft that is already in trendJack:
 
 1. Call `list_drafts` with `draftId`. If the user has no id, call `list_drafts` with `lane` set to `"yours"` and ask which draft. A list entry has no body, so then call `list_drafts` with the chosen `draftId`.
 2. Show the current text and `latestReview`, if a teammate left a review note.

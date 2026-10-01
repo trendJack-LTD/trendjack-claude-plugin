@@ -21,8 +21,5 @@ jobs:
       - name: Validate the marketplace and each plugin
         run: scripts/validate.sh
 
-      - name: Check the tool names in the skills
+      - name: Check the tool names and the connect section in the skills
         run: node scripts/check-tools.mjs
-
-      - name: Check that the dev plugin matches the production plugin
-        run: node scripts/build-dev.mjs --check

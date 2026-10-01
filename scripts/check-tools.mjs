@@ -4,6 +4,7 @@
 // A backticked camelCase word in a skill must be an argument or a field from tools.json.
 // The bare tool names search and fetch are plain English words, so this script cannot police them.
 // claude plugin validate passes frontmatter that YAML cannot parse, so this script refuses it.
+// Every SKILL.md must contain scripts/connect-section.md word for word, and .mcp.json must match tools.json.
 
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
@@ -24,6 +25,7 @@ const PREFIXED_TOOL = /\bmcp__[A-Za-z0-9_-]+/g;
 const CAMEL_CASE_CODE = /`([a-z][a-z0-9]*[A-Z][A-Za-z0-9]*)[`:]/g;
 
 const problems = [];
+const connectSection = readFileSync(join(root, "scripts/connect-section.md"), "utf8");
 
 function markdownFiles(dir) {
   return readdirSync(dir).flatMap((entry) => {
@@ -73,6 +75,14 @@ for (const plugin of plugins) {
   );
   skillCount += skillFolders.length;
 
+  const mcpPath = join(pluginsDir, plugin, ".mcp.json");
+  const servers = JSON.parse(readFileSync(mcpPath, "utf8")).mcpServers ?? {};
+  const server = servers[contract.server];
+  if (Object.keys(servers).length !== 1 || !server) {
+    problems.push(`${relative(root, mcpPath)}: must declare exactly one server, named "${contract.server}" as in tools.json`);
+  } else if (server.url !== contract.url) {
+    problems.push(`${relative(root, mcpPath)}: url ${server.url} is not the tools.json url ${contract.url}`);
+  }
 
   for (const folder of skillFolders) {
     const skillPath = join(skillsDir, folder, "SKILL.md");
@@ -106,6 +116,10 @@ for (const plugin of plugins) {
           `${skillsRel}/${folder}/SKILL.md: description has ${entries.description.length} characters, over ${MAX_DESCRIPTION}`,
         );
       }
+    }
+
+    if (!text.includes(connectSection)) {
+      problems.push(`${skillsRel}/${folder}/SKILL.md: does not contain scripts/connect-section.md word for word`);
     }
 
     const lines = text.split("\n").length;

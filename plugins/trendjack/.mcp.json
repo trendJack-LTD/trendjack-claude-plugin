@@ -1,6 +1,6 @@
 {
   "mcpServers": {
-    "trendjack": {
+    "trendJack": {
       "type": "http",
       "url": "https://app.trendjack.io/api/mcp"
     }

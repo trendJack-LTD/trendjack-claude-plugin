@@ -1,8 +1,8 @@
 {
   "name": "trendjack",
-  "displayName": "TrendJack",
+  "displayName": "trendJack",
   "version": "0.1.0",
-  "description": "Use TrendJack in Claude. TrendJack reads the news for your brand and stores the signals that matter. These skills build your brand profile, brief you on new signals, triage them, plan a week of content and draft posts in your brand voice.",
+  "description": "Use trendJack in Claude. trendJack reads the news for your brand and stores the signals that matter. These skills build your brand profile, brief you on new signals, triage them, plan a week of content and draft posts in your brand voice.",
   "author": {
     "name": "trendJack LTD",
     "url": "https://app.trendjack.io"

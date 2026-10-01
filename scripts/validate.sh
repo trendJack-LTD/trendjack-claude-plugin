@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Runs claude plugin validate --strict on the marketplace and each plugin.
-# trendjack-dev has no version on purpose, so its missing-version warning is the one warning allowed.
+# The marketplace has no version of its own, so its missing-version warning is the one warning allowed.
 set -uo pipefail
 cd "$(dirname "$0")/.."
 
@@ -25,6 +25,6 @@ check() {
 
 check . yes
 for manifest in plugins/*/.claude-plugin/plugin.json; do
-  if [[ "$manifest" == plugins/trendjack-dev/* ]]; then check "./$manifest" yes; else check "./$manifest" no; fi
+  check "./$manifest" no
 done
 exit $status

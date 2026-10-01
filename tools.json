@@ -1,5 +1,5 @@
 {
-  "server": "trendjack",
+  "server": "trendJack",
   "url": "https://app.trendjack.io/api/mcp",
   "tools": [
     { "name": "get_connection", "title": "Get connection", "access": "read" },

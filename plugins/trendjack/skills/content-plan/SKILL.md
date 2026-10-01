@@ -1,15 +1,30 @@
 ---
 name: content-plan
-description: Use when the user wants a content calendar, a weekly content plan, a posting schedule, or ideas for what to publish next week from their TrendJack signals. Claude reads the last seven days of TrendJack signals and the brand profile, picks the signals worth publishing about, and lays them out as a calendar across the brand's content pillars, with a format, an angle and a source signal for each slot.
+description: Use when the user wants a content calendar, a weekly content plan, a posting schedule, or ideas for what to publish next week from their trendJack signals. Claude reads the last seven days of trendJack signals and the brand profile, picks the signals worth publishing about, and lays them out as a calendar across the brand's content pillars, with a format, an angle and a source signal for each slot.
 ---
 
 # Plan a week of content
 
-This skill turns one week of TrendJack signals into a content calendar for the coming week. Each slot ties one signal to one content pillar and one format. The calendar spreads the slots across the brand's pillars, so no pillar goes silent and no pillar crowds out the rest.
+This skill turns one week of trendJack signals into a content calendar for the coming week. Each slot ties one signal to one content pillar and one format. The calendar spreads the slots across the brand's pillars, so no pillar goes silent and no pillar crowds out the rest.
+
+## If the trendJack tools are missing
+
+The trendJack tools come from the trendJack connector, for example `get_connection` and `list_signals`. Some apps load connector tools only when needed. Search your tools for "trendJack" before you decide they are missing. Other connectors can also have tools named `search` and `fetch`. Use the ones from trendJack.
+
+If a trendJack tool call asks the user to connect, wait until they finish. Then make the same call again.
+
+If the tools are still missing, trendJack is not connected yet. Say so in one sentence, then give the steps for the user's app:
+
+- **Claude Code:** if you have a trendJack `authenticate` tool, call it and give the user the link it returns. Otherwise, ask the user to run `/mcp`, pick trendJack and choose **Authenticate**.
+- **claude.ai and Claude Desktop:** ask the user to open **Customize > Plugins > trendJack > Connectors** and select **Connect** next to trendJack.
+
+trendJack then asks the user to sign in or create an account, and to pick the workspace that Claude saves to. If the tools still do not appear after the user connects, ask them to start a new chat. Never tell the user to disconnect and connect again when trendJack was never connected.
+
+When you talk to the user, call the workspace with `writable: true` the workspace they connected. Do not call it "writable".
 
 ## Steps
 
-1. Call `get_connection`. Pick the workspace. Use the one the user names, or the writable one. If `profileBuilt` is false, stop and offer the onboarding skill.
+1. Call `get_connection`. Pick the workspace. Use the one the user names, or the one with `writable: true`. If `profileBuilt` is false, stop and offer the onboarding skill.
 2. Call `get_company_profile` for that workspace. Note the active pillars, the voice guide, and the tracked competitors and prospects.
 3. Call `list_signals` twice, once with `status` set to `"kept"` and once with `status` set to `"waiting"`. Use these arguments in both calls:
    - `workspace`: the workspace from step 1
